@@ -1,12 +1,12 @@
 {
   "name": "@bsit/ava-playwright-fluent-light",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "./lib/index.js",
   "scripts": {
     "build": "tsc"
   },
-  "author": "",
+  "author": "Bo Pluszek",
   "license": "ISC",
   "devDependencies": {
     "@types/debug": "4.1.5",

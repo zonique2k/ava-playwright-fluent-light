@@ -22,7 +22,7 @@ function log(state: string, fn: any, functionArgs: IArguments) {
 
         msg += " " + argsWithValue.join(", ");
     }
-    console.log(msg);
+    // console.log(msg);
 }
 interface StartBrowserOptions{
     headless: boolean;
