@@ -22,7 +22,7 @@ function log(state: string, fn: any, functionArgs: IArguments) {
 
         msg += " " + argsWithValue.join(", ");
     }
-    // console.log(msg);
+    console.log(msg);
 }
 interface StartBrowserOptions{
     headless: boolean;
@@ -31,8 +31,9 @@ interface StartBrowserOptions{
 class actions {
     protected browser?: Browser;
     protected page?: Page;
-
+    protected retries: number = 0;
     protected actions: (() => Promise<void>)[] = [];
+    protected currentActionIndex: number =0;
 
     // browser
     public startBrowser(name: BrowserName, options?: StartBrowserOptions) {
@@ -52,6 +53,11 @@ class actions {
                     break;
             }
         });
+        return this;
+    }
+    public withRetry(numberOfRetries: number){
+        log("SETUP", this.withRetry, arguments);
+        this.retries = numberOfRetries;
         return this;
     }
     public close() {
@@ -151,19 +157,32 @@ export class AvaPlaywrightFluent extends actions implements PromiseLike<void> {
             this._lastError = undefined;
             // eslint-disable-next-line no-constant-condition
             while (true) {
-                if (this.actions.length === 0) {
+                if (this.actions.length < this.currentActionIndex) {
                     break;
                 }
-                const action = this.actions.shift();
+                //const action = this.actions.shift();
+                const action = this.actions[this.currentActionIndex++];
                 action && (await action());
             }
         } catch (error) {
-            this._lastError = error;
-            this.actions = [];
-            throw error;
-        } finally {
-            this.actions = [];
-        }
+            if(this.retries>0)
+            {
+                console.log("ERROR: error was thrown. " + this.retries + " retries left");
+                this.retries--;
+                this.currentActionIndex=0;
+                if(this.browser){
+                    await this.browser.close();
+                    this.browser = undefined;                    
+                }
+                await this.executeActions();
+            }
+            else{
+                this._lastError = error;
+                this.actions = [];
+                throw error;
+            }                
+        } 
+        this.actions = [];
     }
 
     public assertIsVisible(selector: string){

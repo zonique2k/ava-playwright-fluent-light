@@ -8,8 +8,11 @@ interface StartBrowserOptions {
 declare class actions {
     protected browser?: Browser;
     protected page?: Page;
+    protected retries: number;
     protected actions: (() => Promise<void>)[];
+    protected currentActionIndex: number;
     startBrowser(name: BrowserName, options?: StartBrowserOptions): this;
+    withRetry(numberOfRetries: number): this;
     close(): this;
     navigateTo(url: string): this;
     wait(durationInMilliseconds: number): this;
